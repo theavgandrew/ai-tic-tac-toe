@@ -1,4 +1,4 @@
-from math import inf as infinte 
+from math import inf as infinity 
 from random import choice 
 
 # game board 
@@ -10,10 +10,51 @@ AI = +1
 HUMAN = -1
 
 def ai_move():
-  print()
-
-def minimax(state, depth, player):
   print
+
+'''
+function used to determine the static value of the state
+:param state: the given state of the game
+:return: the static value of the state of the game 
+'''
+def evaluate(state):
+  if check_win(state, AI):
+    return +1
+  elif check_win(state, HUMAN): 
+    return -1
+  else: 
+    return 0
+
+'''
+
+'''
+def minimax(state, depth, player):
+  if depth == 0 or check_win(state, player) == True: 
+    return [-1, -1, evaluate(state)]
+  
+  if player == AI: 
+    best_val = [-1, -1, -infinity]
+  else: 
+    best_val = [-1, -1, infinity] 
+
+  cells = empty_cells(state) 
+
+  for cell in cells: # checking all children (aka possible moves) 
+    x, y = cell[0], cell[1]
+    state[x][y] = player
+    curr_val = minimax(state, depth - 1, -player) 
+    state[x][y] = 0
+    curr_val[0], curr_val[1] = x, y
+
+    if player == AI: 
+      if curr_val[2] > best_val[2]: # ensures max value 
+        best_val[2] = curr_val[2]
+    elif player == HUMAN: 
+      if curr_val[2] < best_val[2]: # ensures min value
+        best_val[2] = curr_val[2]
+
+  return best_val
+
 
 def empty_cells(state):
   cells = []
