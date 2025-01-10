@@ -15,7 +15,6 @@ AI = +1
 HUMAN = -1
 
 
-
 def set_move(x, y, player):
   '''
   function sets the move on the board given the specifed x and y coordinates and player
@@ -43,9 +42,6 @@ def evaluate(state):
   else: 
     return 0
 
-'''
-
-'''
 def minimax(state, depth, player):
   if depth == 0 or game_over(state): 
     return [-1, -1, evaluate(state)]
@@ -70,7 +66,6 @@ def minimax(state, depth, player):
         best_val = curr_val
 
   return best_val
-
 
 def empty_cells(state):
   cells = []
@@ -254,8 +249,6 @@ def play_game():
       print('DRAW!')
 
   exit()
-
-
 
 if __name__ == '__main__': 
   play_game()
