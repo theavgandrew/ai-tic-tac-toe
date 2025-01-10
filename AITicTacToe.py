@@ -1,5 +1,8 @@
 from math import inf as infinity 
 from random import choice 
+import platform
+from os import system
+import time
 
 # game board 
 board = [
@@ -12,27 +15,27 @@ AI = +1
 HUMAN = -1
 
 
-'''
-function sets the move on the board given the specifed x and y coordinates and player
-:param x: x coordinate on the board
-:param y: y coordinate on the board
-:param player: specified player whose move the function is setting
-:return: True if setting the move was successful; otherwise, False
-'''
+
 def set_move(x, y, player):
+  '''
+  function sets the move on the board given the specifed x and y coordinates and player
+  :param x: x coordinate on the board
+  :param y: y coordinate on the board
+  :param player: specified player whose move the function is setting
+  :return: True if setting the move was successful; otherwise, False
+  '''
   if board[x][y] == 0: # if cell at [x, y] is empty
     board[x][y] = player
     return True
   else: 
     return False
-
-
-'''
-function used to determine the static value of the state
-:param state: the given state of the game
-:return: the static value of the state of the game 
-'''
+  
 def evaluate(state):
+  '''
+  function used to determine the static value of the state
+  :param state: the given state of the game
+  :return: the static value of the state of the game 
+  '''
   if check_win(state, AI):
     return +1
   elif check_win(state, HUMAN): 
@@ -73,20 +76,19 @@ def minimax(state, depth, player):
 
 def empty_cells(state):
   cells = []
-  for x, rows in enumerate(board):
+  for x, rows in enumerate(state):
     for y, cell in enumerate(rows):
       if cell == 0: 
         cells.append([x, y])
   return cells
 
-
-'''
-Checks to see if a specific player has won the game in the given state of the game
-:param state: the given state of the game 
-:param player: states whether the specified player is the human or AI
-:return: True if the specified player wins the game; otherwise, False
-'''
 def check_win(state, player): 
+  '''
+  Checks to see if a specific player has won the game in the given state of the game
+  :param state: the given state of the game 
+  :param player: states whether the specified player is the human or AI
+  :return: True if the specified player wins the game; otherwise, False
+  '''
   possible_wins = [[state[0][0], state[0][1], state[0][2]], 
                    [state[1][0], state[1][1], state[1][2]], 
                    [state[2][0], state[2][1], state[2][2]],
@@ -116,6 +118,7 @@ def ai_move(c_symb, h_symb):
     move = minimax(board, depth, AI)
     x, y = move[0], move[1]
 
+  time.sleep(1) 
   return set_move(x, y, AI)
 
 def human_move(c_symb, h_symb): 
@@ -133,9 +136,9 @@ def human_move(c_symb, h_symb):
 
   clear()
   print(f"It's your turn [{h_symb}]")
-  print_board(c_symb, h_symb)
+  print_board(board, c_symb, h_symb)
 
-  while not 1 > move > 9: 
+  while move > 9 or move < 1: 
     try:
       move = int(input("Input your move (1-9): "))
       coord = possible_moves[move] 
@@ -153,29 +156,106 @@ def human_move(c_symb, h_symb):
       # or not a number
       print("Horribly invalid move. Try again.")
 
-
-
-
-
-
 def clear():
-  print()
+  os_name = platform.system().lower()
+  if 'windows' in os_name: 
+    system('cls')
+  else: 
+    system('clear') 
+  
 def print_board(state, c_symb, h_symb): 
-  print()
+  symb_dict = {
+    -1: h_symb,
+    +1: c_symb,
+    0: ' '
+  }
+  num_board = [
+     [1, 2, 3], 
+     [4, 5, 6], 
+     [7, 8, 9] 
+  ]
+  line = '-----------------                 -----------------'
 
-'''
-Determines whether the game is over or not
-:param state: the given state of the game
-:return: True if someone has wins the game; otherwise, False
-'''
+  print('\n' + line)
+  for x, row in enumerate(state):
+    for cell in row:
+      symbol = symb_dict[cell]
+      print(f'| {symbol} |', end=' ')
+
+    print('                ', end='')
+
+    for y in range(0, len(row)): 
+       print(f'| {num_board[x][y]} |', end= ' ')
+    print('\n' + line) 
+
+
 def game_over(state):
+  '''
+  Determines whether the game is over or not
+  :param state: the given state of the game
+  :return: True if someone has wins the game; otherwise, False
+  '''
   return check_win(state, HUMAN) or check_win(state, AI) 
 
-def player_move():
-  print()
 
 def play_game():
-  print
+  clear()
+
+  h_symb = ' '
+  c_symb = ' '
+  first = ' ' 
+
+  while h_symb != 'O' and h_symb != 'X': 
+    try: 
+      print('')
+      h_symb = input("Choose X or O \nChosen: ").upper()
+    except (EOFError, KeyboardInterrupt):
+            print("Oh, okay. Bye!")
+            exit()
+    except (KeyError, ValueError):
+            print("Not valid")
+
+  c_symb = 'X' if h_symb == 'O' else 'O'
+
+  clear()
+
+  while first != 'Y' and first != 'N':
+    try:
+      first = input("Do you want to start first?[y/n]: ").upper()
+    except (EOFError, KeyboardInterrupt):
+            print("Oh, okay. Bye!")
+            exit()
+    except (KeyError, ValueError):
+            print("Not valid")
+
+  # main loop
+  while len(empty_cells(board)) > 0 and not game_over(board):
+    if first == 'Y': 
+      human_move(c_symb, c_symb)
+      first = ''
+
+    ai_move(c_symb, h_symb)
+    human_move(c_symb, h_symb) 
+
+  # Game over message
+  if check_win(board, HUMAN):
+      clear()
+      print(f'Human turn [{h_symb}]')
+      print_board(board, c_symb, h_symb)
+      print('YOU WIN!')
+  elif check_win(board, AI):
+      clear()
+      print(f'Computer turn [{c_symb}]')
+      print_board(board, c_symb, h_symb)
+      print('YOU LOSE!')
+  else:
+      clear()
+      print_board(board, c_symb, h_symb)
+      print('DRAW!')
+
+  exit()
+
+
 
 if __name__ == '__main__': 
   play_game()
