@@ -47,22 +47,20 @@ def evaluate(state):
 
 '''
 def minimax(state, depth, player):
-  if depth == 0 or check_win(state, player) == True: 
+  if depth == 0 or game_over(state): 
     return [-1, -1, evaluate(state)]
   
   if player == AI: 
     best_val = [-1, -1, -infinity]
   else: 
-    best_val = [-1, -1, infinity] 
+    best_val = [-1, -1, +infinity] 
 
-  cells = empty_cells(state) 
-
-  for cell in cells: # checking all children (aka possible moves) 
+  for cell in empty_cells(state) : # checking all children (aka possible moves) 
     x, y = cell[0], cell[1]
-    state[x][y] = player
+    state[x][y] = player # make a move 
     curr_val = minimax(state, depth - 1, -player) 
-    state[x][y] = 0
-    curr_val[0], curr_val[1] = x, y
+    state[x][y] = 0 # reverts move 
+    curr_val[0], curr_val[1] = x, y # score of move 
 
     if player == AI: 
       if curr_val[2] > best_val[2]: # ensures max value 
@@ -89,14 +87,16 @@ def check_win(state, player):
   :param player: states whether the specified player is the human or AI
   :return: True if the specified player wins the game; otherwise, False
   '''
-  possible_wins = [[state[0][0], state[0][1], state[0][2]], 
-                   [state[1][0], state[1][1], state[1][2]], 
-                   [state[2][0], state[2][1], state[2][2]],
-                   [state[0][0], state[1][0], state[2][0]],
-                   [state[0][1], state[1][1], state[2][1]],
-                   [state[0][2], state[1][2], state[2][2]],
-                   [state[0][0], state[1][1], state[2][2]],
-                   [state[0][2], state[1][1], state[2][0]]]
+  possible_wins = [
+    [state[0][0], state[0][1], state[0][2]], 
+    [state[1][0], state[1][1], state[1][2]], 
+    [state[2][0], state[2][1], state[2][2]],
+    [state[0][0], state[1][0], state[2][0]],
+    [state[0][1], state[1][1], state[2][1]],
+    [state[0][2], state[1][2], state[2][2]],
+    [state[0][0], state[1][1], state[2][2]],
+    [state[2][0], state[1][1], state[0][2]],
+]
   if [player, player, player] in possible_wins:
     return True
   else: 
